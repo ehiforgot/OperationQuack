@@ -3,7 +3,7 @@ local conf = require("conf")
 
 local levels = conf.loadLevels()
 local player = { x = 1, y = 1 }
-local level = 1 -- Keeps track of current level
+local level = 10 -- Keeps track of current level
 local totalLevels = 0
 local TILE_SIZE = 32 -- Tile size in pixels
 local score = 0 -- Current score
@@ -15,7 +15,7 @@ local doorLock = false
 
 -- Grid dimensions
 local GRID_WIDTH = 19
-local GRID_HEIGHT = 15 
+local GRID_HEIGHT = 17 
 
 -- Game state
 local resetStatus = {} -- Tracks whether each level has been reset
@@ -26,20 +26,38 @@ local state = "menu" -- Inital state is "menu": {menu, howToPlay, leaderboard, h
 -- Button dimensions
 local buttonWidth = 150
 local buttonHeight = 50
-local resetButtonX = (GRID_WIDTH * TILE_SIZE) - buttonWidth - 10
-local resetButtonY = GRID_HEIGHT * TILE_SIZE + 10
-local exitButtonX = (GRID_WIDTH * TILE_SIZE) / 2 - buttonWidth / 2
-local exitButtonY = GRID_HEIGHT * TILE_SIZE / 2 + 108
-local startButtonX = (GRID_WIDTH * TILE_SIZE) / 2 - buttonWidth / 2
-local startButtonY = (GRID_HEIGHT * TILE_SIZE) / 2 + 50
-local howToPlayButtonX = startButtonX
-local howToPlayButtonY = startButtonY + buttonHeight + 10
-local menuButtonX = startButtonX
-local menuButtonY = GRID_HEIGHT * TILE_SIZE - buttonHeight - 20
-local leaderboardButtonX = startButtonX
-local leaderboardButtonY = howToPlayButtonY + buttonHeight + 10
-local confirmButtonX = menuButtonX
-local confirmButtonY = menuButtonY
+
+local button1X = (GRID_WIDTH * TILE_SIZE) / 2 - buttonWidth / 2 -- Position 1
+local button1Y = (GRID_HEIGHT * TILE_SIZE) / 2 + 50
+local button2X = (GRID_WIDTH * TILE_SIZE) / 2 - buttonWidth / 2 -- Position 2
+local button2Y = (GRID_HEIGHT * TILE_SIZE) / 2 + 110
+local button3X = (GRID_WIDTH * TILE_SIZE) / 2 - buttonWidth / 2 -- Position 3
+local button3Y = (GRID_HEIGHT * TILE_SIZE) / 2 + 170
+local button4X = (GRID_WIDTH * TILE_SIZE) / 2 - buttonWidth / 2 -- Position 4
+local button4Y = (GRID_HEIGHT * TILE_SIZE) / 2 + 230
+local button5X = TILE_SIZE - 10
+local button5Y = 2
+local button6X = TILE_SIZE * 14 - 10
+local button6Y = 2
+
+--local resetButtonX = (GRID_WIDTH * TILE_SIZE) - buttonWidth - 10
+--local resetButtonY = GRID_HEIGHT * TILE_SIZE + 10
+--local exitButtonX = (GRID_WIDTH * TILE_SIZE) / 2 - buttonWidth / 2
+--local exitButtonY = GRID_HEIGHT * TILE_SIZE / 2 + 108
+--local startButtonX = (GRID_WIDTH * TILE_SIZE) / 2 - buttonWidth / 2
+--local startButtonY = (GRID_HEIGHT * TILE_SIZE) / 2 + 50
+--local howToPlayButtonX = button1X
+--local howToPlayButtonY = button1Y + buttonHeight + 10
+--local menuButtonX = button1X
+--local menuButtonY = GRID_HEIGHT * TILE_SIZE - buttonHeight - 20
+--local leaderboardButtonX = button1X
+--local leaderboardButtonY = howToPlayButtonY + buttonHeight + 10
+local confirmButtonX = button1X
+local confirmButtonY = GRID_HEIGHT * TILE_SIZE - buttonHeight - 20
+
+local keypadButtonX = TILE_SIZE * 13
+local keypadButtonY = TILE_SIZE * 17 + 5
+
 
 -- Gif Data
 local duckFrames = {}
@@ -72,7 +90,7 @@ end
 
 -- Image Data
 local images = {}
-local imageNames = {"dragon", "grapes", "no", "lock", "ladder", "door1", "door2", "floor", "fire", "wall1", "wall2", "bridge", "dirt1", "dirt2", "stand"} -- INCLUDE ANY /images/...".png"
+local imageNames = {"arcade", "dragon", "grapes", "no", "lock", "ladder", "door1", "door2", "floor", "fire", "wall1", "wall2", "bridge", "dirt1", "dirt2", "stand"} -- INCLUDE ANY /images/...".png"
 
 local function loadImage() -- Load File
     for _, imageName in ipairs(imageNames) do
@@ -91,7 +109,7 @@ local function drawBackground()
     if images["wall2"] then
         love.graphics.setColor(1, 1, 1)
         local screenWidth = (18 * TILE_SIZE)
-        local screenHeight = (18 * TILE_SIZE)
+        local screenHeight = (24 * TILE_SIZE)
         local imageWidth = images["wall2"]:getWidth()
         local imageHeight = images["wall2"]:getHeight()
 
@@ -111,7 +129,13 @@ end
 -- Draw space for text function
 local function drawBackgroundText()
     love.graphics.setColor(0, 0, 0) -- Black background
-    love.graphics.rectangle("fill", TILE_SIZE * 1, TILE_SIZE * 1, TILE_SIZE * 17, TILE_SIZE * 15)
+    love.graphics.rectangle("fill", TILE_SIZE * 1, TILE_SIZE * 2, TILE_SIZE * 17, TILE_SIZE * 16)
+end
+
+-- Draw arcade overlay
+local function drawArcade()
+    love.graphics.setColor(1, 1, 1)
+    love.graphics.draw(images["arcade"], 0, 0, 0, TILE_SIZE * 19 / images["arcade"]:getWidth(), TILE_SIZE * 25 / images["arcade"]:getHeight())
 end
 
 -- Leaderboard data
@@ -210,36 +234,43 @@ end
 -- Draw game state
 function love.draw()
     drawBackground()
+    drawArcade()
+
     --Draw main menu
     if state == "menu" then
+        love.graphics.setColor(0, 0, 0) -- Black background
+        love.graphics.rectangle("fill", TILE_SIZE * 5, TILE_SIZE * 4, TILE_SIZE * 9, TILE_SIZE * 1)
+
+        -- Draw Title
         love.graphics.setColor(1, 1, 1)
         love.graphics.setNewFont(32)
-        love.graphics.printf(" Operation Quack.", 0, GRID_HEIGHT * TILE_SIZE / 4, GRID_WIDTH * TILE_SIZE, "center")
+        love.graphics.printf("Operation Quack.", 0, (TILE_SIZE * 4) - 4, (GRID_WIDTH * TILE_SIZE) + 2, "center")
 
         -- Draw the Start button
         love.graphics.setColor(0.2, 0.8, 0.2) -- Green button
-        love.graphics.rectangle("fill", startButtonX, startButtonY, buttonWidth, buttonHeight)
+        love.graphics.rectangle("fill", button1X, button1Y, buttonWidth, buttonHeight)
         love.graphics.setColor(1, 1, 1) -- White text
         love.graphics.setNewFont(16)
-        love.graphics.printf("Start", startButtonX, startButtonY + (buttonHeight / 2) - 10, buttonWidth, "center")
+        love.graphics.printf("Start", button1X, button1Y + (buttonHeight / 2) - 10, buttonWidth, "center")
 
         --Draw the How To Play button
         love.graphics.setColor(0.2, 0.2, 0.2) -- Dark grey button
-        love.graphics.rectangle("fill", howToPlayButtonX, howToPlayButtonY, buttonWidth, buttonHeight)
+        love.graphics.rectangle("fill", button2X, button2Y, buttonWidth, buttonHeight)
         love.graphics.setColor(1, 1, 1) -- White text
         love.graphics.setNewFont(16)
-        love.graphics.printf("How To Play?", howToPlayButtonX, howToPlayButtonY + 15, buttonWidth, "center")
+        love.graphics.printf("How To Play?", button2X, button2Y + 15, buttonWidth, "center")
 
         -- Draw the Leaderboard button
         love.graphics.setColor(0.2, 0.2, 0.8) -- Blue button
-        love.graphics.rectangle("fill", leaderboardButtonX, leaderboardButtonY, buttonWidth, buttonHeight)
+        love.graphics.rectangle("fill", button3X, button3Y, buttonWidth, buttonHeight)
         love.graphics.setColor(1, 1, 1) -- White text
-        love.graphics.printf("Leaderboard", leaderboardButtonX, leaderboardButtonY + (buttonHeight / 2) - 10, buttonWidth, "center")
+        love.graphics.printf("Leaderboard", button3X, button3Y + (buttonHeight / 2) - 10, buttonWidth, "center")
+        
         
 
     -- Draw instrucstions screen
     elseif state == "howToPlay" then
-        yPos = GRID_HEIGHT * TILE_SIZE / 4 - 50
+        yPos = GRID_HEIGHT * TILE_SIZE / 4 - 10
         drawBackgroundText()
         love.graphics.setColor(1, 1, 1)
         love.graphics.setNewFont(30)
@@ -248,8 +279,8 @@ function love.draw()
         yPos = yPos + 100 -- Adjust y position for next line
         love.graphics.setNewFont(14)
         love.graphics.printf("Objective:", 70, yPos, GRID_WIDTH * TILE_SIZE, "left")
-        love.graphics.printf("Mr. Duck has classified details on a lemonade stand.\nHelp Mr. Duck find the stand by guiding him through\nthe obstacles. Solve levels completely to earn extra\npoints. Try to earn as many points as you can!", 160, yPos, GRID_WIDTH * TILE_SIZE, "left")
-        yPos = yPos + 120 -- Adjust y position for next line
+        love.graphics.printf("Mr. Duck has classified details on a lemonade stand.\nHelp Mr. Duck find the stand by guiding him through\nthe obstacles. Earn extra points by completely\nsolving levels. Try to earn as many points as possible!", 160, yPos, GRID_WIDTH * TILE_SIZE, "left")
+        yPos = yPos + 100 -- Adjust y position for next line
         love.graphics.printf("Controls:", 70, yPos, GRID_WIDTH * TILE_SIZE, "left")
         love.graphics.printf("Use Arrow Keys (Up, Down, Left, Right) to move.", 160, yPos, GRID_WIDTH * TILE_SIZE, "left")
         yPos = yPos + 90 -- Adjust y position for next line
@@ -258,21 +289,21 @@ function love.draw()
 
         --Draw menu button
         love.graphics.setColor(0.8, 0.8, 0.8) -- Light grey button
-        love.graphics.rectangle("fill", menuButtonX, menuButtonY, buttonWidth, buttonHeight)
+        love.graphics.rectangle("fill", button3X, button3Y, buttonWidth, buttonHeight)
         love.graphics.setColor(0, 0, 0) -- Black Text
         love.graphics.setNewFont(16)
-        love.graphics.printf("Back", menuButtonX, menuButtonY + 15, buttonWidth, "center")
+        love.graphics.printf("Back", button3X, button3Y + 15, buttonWidth, "center")
 
 
     -- Draw the Leaderboard screen
     elseif state == "leaderboard" then
-        yPos = GRID_HEIGHT * TILE_SIZE / 4 - 55
+        yPos = GRID_HEIGHT * TILE_SIZE / 4 - 10
         drawBackgroundText()
         love.graphics.setColor(1, 1, 1) -- White text
         love.graphics.setNewFont(30)
         love.graphics.printf("Leaderboard", 0, yPos, GRID_WIDTH * TILE_SIZE, "center")
 
-        yPos = yPos + 82
+        yPos = yPos + 90
         love.graphics.setNewFont(16)
         for i, entry in ipairs(leaderboard) do
             love.graphics.printf(string.format("%d.", i), 210, yPos, GRID_WIDTH * TILE_SIZE, "left")
@@ -284,10 +315,10 @@ function love.draw()
 
         -- Draw menu button
         love.graphics.setColor(0.8, 0.8, 0.8) -- Light grey button
-        love.graphics.rectangle("fill", menuButtonX, menuButtonY, buttonWidth, buttonHeight)
+        love.graphics.rectangle("fill", button3X, button3Y, buttonWidth, buttonHeight)
         love.graphics.setColor(0, 0, 0) -- Black text
         love.graphics.setNewFont(16)
-        love.graphics.printf("Back", menuButtonX, menuButtonY + 15, buttonWidth, "center")
+        love.graphics.printf("Back", button3X, button3Y + 15, buttonWidth, "center")
 
 
     -- Draw the grid
@@ -342,13 +373,13 @@ function love.draw()
         -- Draw last level
         if level == totalLevels then
             love.graphics.setColor(1, 1, 1) -- Set color to white (default)
-            love.graphics.draw(skyFrames[currentSkyFrame], 0, 0, 0, TILE_SIZE * 20 / skyFrames[currentSkyFrame]:getWidth(), TILE_SIZE * 11 / skyFrames[currentSkyFrame]:getHeight())
-            love.graphics.draw(images["stand"], TILE_SIZE * 14, TILE_SIZE * 7, 0, (TILE_SIZE * 4) / images["stand"]:getWidth(), (TILE_SIZE * 4) / images["stand"]:getHeight())
-            if player.x == 15 and player.y == 11 then -- Draw duck text bubble
-                love.graphics.draw(images["grapes"], TILE_SIZE * 10.5, TILE_SIZE * 9, 0, (TILE_SIZE * 3.5) / images["grapes"]:getWidth(), (TILE_SIZE * 1) / images["grapes"]:getHeight())
+            love.graphics.draw(skyFrames[currentSkyFrame], 0, 0, 0, TILE_SIZE * 20 / skyFrames[currentSkyFrame]:getWidth(), TILE_SIZE * 13 / skyFrames[currentSkyFrame]:getHeight())
+            love.graphics.draw(images["stand"], TILE_SIZE * 14, TILE_SIZE * 9, 0, (TILE_SIZE * 4) / images["stand"]:getWidth(), (TILE_SIZE * 4) / images["stand"]:getHeight())
+            if player.x == 15 and player.y == 13 then -- Draw duck text bubble
+                love.graphics.draw(images["grapes"], TILE_SIZE * 10.5, TILE_SIZE * 11, 0, (TILE_SIZE * 3.5) / images["grapes"]:getWidth(), (TILE_SIZE * 1) / images["grapes"]:getHeight())
             end
             if state == "end" and player.x ~= 15 then -- Draw man text bubble
-                love.graphics.draw(images["no"], TILE_SIZE * 17, TILE_SIZE * 7.5, 0, (TILE_SIZE * 1.5) / images["no"]:getWidth(), (TILE_SIZE * 1.5) / images["no"]:getHeight())
+                love.graphics.draw(images["no"], TILE_SIZE * 17, TILE_SIZE * 9.5, 0, (TILE_SIZE * 1.5) / images["no"]:getWidth(), (TILE_SIZE * 1.5) / images["no"]:getHeight())
             end
         end
 
@@ -359,45 +390,50 @@ function love.draw()
         else
             love.graphics.draw(duckFrames[currentDuckFrame], (player.x-1)*TILE_SIZE, (player.y-1)*TILE_SIZE, 0, TILE_SIZE / duckFrames[currentDuckFrame]:getWidth(), TILE_SIZE / duckFrames[currentDuckFrame]:getHeight()) -- Right facing
         end
+        
+        -- Draw keypad
+        --love.graphics.setColor(1, 1, 1) -- Reset to white (default)
+        --love.graphics.draw(images["keypad"], TILE_SIZE * 13, TILE_SIZE * 16, 0, (TILE_SIZE * 4) / images["keypad"]:getWidth(), (TILE_SIZE * 4) / images["keypad"]:getHeight())
 
         if state == "game" then
             -- Draw level counter
             love.graphics.setColor(1, 1, 1)
             love.graphics.setNewFont(20)
-            love.graphics.print("Level", 72, 5)
-            love.graphics.printf(level, TILE_SIZE * 4, 5, TILE_SIZE, "center")
+            love.graphics.print("Level", 72, 69)
+            love.graphics.printf(level, TILE_SIZE * 4, 69, TILE_SIZE, "center")
 
             -- Draw available points for current level
             love.graphics.setColor(1,1,1)
-            love.graphics.printf(score - entryScore, TILE_SIZE * 7 - 4, 5, TILE_SIZE * 2, "right")
-            love.graphics.printf("/", 276, 5, TILE_SIZE, "center")
-            love.graphics.printf(dotCount, TILE_SIZE * 9 + 10, 5, TILE_SIZE * 2, "left")
+            love.graphics.printf(score - entryScore, TILE_SIZE * 7 - 4, 69, TILE_SIZE * 2, "right")
+            love.graphics.printf("/", 276, 69, TILE_SIZE, "center")
+            love.graphics.printf(dotCount, TILE_SIZE * 9 + 10, 69, TILE_SIZE * 2, "left")
 
             -- Draw levels solved counter
-            love.graphics.print("Solved", 445, 5)
-            love.graphics.printf(solved, TILE_SIZE * 16, 5, TILE_SIZE, "center")
+            love.graphics.print("Solved", 445, 69)
+            love.graphics.printf(solved, TILE_SIZE * 16, 69, TILE_SIZE, "center")
 
             -- Draw current user score
-            love.graphics.print("Points", TILE_SIZE, TILE_SIZE * 15 + 4)
-            love.graphics.printf(score, TILE_SIZE * 3 + 9, TILE_SIZE * 15 + 4, TILE_SIZE * 3)
+            love.graphics.print("Points", TILE_SIZE, TILE_SIZE * 15 + 68)
+            love.graphics.printf(score, TILE_SIZE * 3 + 9, TILE_SIZE * 15 + 68, TILE_SIZE * 3)
+
+            drawArcade()
 
             -- Draw the menu button
             love.graphics.setNewFont(16)
             love.graphics.setColor(0.8, 0.8, 0.8) -- Light grey button
-            love.graphics.rectangle("fill", resetButtonX - buttonWidth, resetButtonY, buttonWidth, buttonHeight)
+            love.graphics.rectangle("fill", button5X, button5Y, buttonWidth, buttonHeight)
             love.graphics.setColor(0, 0, 0) -- Black Text
-            love.graphics.printf("Back To Menu", resetButtonX - buttonWidth, resetButtonY + (buttonHeight / 2) - 10, buttonWidth, "center")
+            love.graphics.printf("Back To Menu", button5X, button5Y + (buttonHeight / 2) - 10, buttonWidth, "center")
 
             -- Draw the reset button
             love.graphics.setColor(0.8, 0, 0) -- Red button
-            love.graphics.rectangle("fill", resetButtonX, resetButtonY, buttonWidth, buttonHeight)
+            love.graphics.rectangle("fill", button6X, button6Y, buttonWidth, buttonHeight)
             love.graphics.setColor(1, 1, 1) -- White text
-            love.graphics.printf("Reset", resetButtonX, resetButtonY + (buttonHeight / 2) - 10, buttonWidth, "center")
+            love.graphics.printf("Reset Level", button6X, button6Y + (buttonHeight / 2) - 10, buttonWidth, "center")
 
         elseif state == "highscore" then
-            love.graphics.setColor(1, 1, 1)
+            drawArcade()
 
-            --love.graphics.draw(images["grapes"], TILE_SIZE * 10.5, TILE_SIZE * 9, 0, (TILE_SIZE * 3.5) / images["grapes"]:getWidth(), (TILE_SIZE * 1) / images["grapes"]:getHeight())
             love.graphics.setNewFont(30)
             love.graphics.printf("New Highscore!", 0, GRID_HEIGHT * TILE_SIZE / 4, GRID_WIDTH * TILE_SIZE, "center")
             
@@ -418,26 +454,25 @@ function love.draw()
             love.graphics.printf("Confirm", confirmButtonX, confirmButtonY + 15, buttonWidth, "center")
 
         elseif state == "end" then
-            love.graphics.setColor(1, 1, 1)
+            drawArcade()
 
-            --love.graphics.draw(images["no"], TILE_SIZE * 17, TILE_SIZE * 7.5, 0, (TILE_SIZE * 1.5) / images["no"]:getWidth(), (TILE_SIZE * 1.5) / images["no"]:getHeight())
-            
+            -- Draw end game player stats
             love.graphics.printf("You Win!", 0, GRID_HEIGHT * TILE_SIZE / 2 - 50, GRID_WIDTH * TILE_SIZE, "center")
             love.graphics.printf("Final Score: " .. score, 0, GRID_HEIGHT * TILE_SIZE / 2, GRID_WIDTH * TILE_SIZE, "center")
             love.graphics.printf("Levels Completed Without Reset: " .. totalLevelsCompletedWithoutReset, 0, GRID_HEIGHT * TILE_SIZE / 2 + 30, GRID_WIDTH * TILE_SIZE, "center")
 
-            -- Draw the exit button
-            love.graphics.setColor(0.8, 0, 0) -- Light grey button
-            love.graphics.rectangle("fill", exitButtonX, exitButtonY, buttonWidth, buttonHeight)
+            -- Draw leaderboard button
+            love.graphics.setColor(0.2, 0.2, 0.8) -- Blue button
+            love.graphics.rectangle("fill", button3X, button3Y, buttonWidth, buttonHeight)
             love.graphics.setColor(1, 1, 1) -- White text
-            love.graphics.printf("Quit", exitButtonX, exitButtonY + (buttonHeight / 2) - 10, buttonWidth, "center")
+            love.graphics.printf("Leaderboard", button3X, button3Y + (buttonHeight / 2) - 10, buttonWidth, "center")
 
             --Draw menu button
             love.graphics.setColor(0.2, 0.2, 0.2) -- Dark grey button
-            love.graphics.rectangle("fill", menuButtonX, menuButtonY, buttonWidth, buttonHeight)
+            love.graphics.rectangle("fill", button4X, button4Y, buttonWidth, buttonHeight)
             love.graphics.setColor(1, 1, 1) -- White text
             love.graphics.setNewFont(16)
-            love.graphics.printf("Main Menu", menuButtonX, menuButtonY + 15, buttonWidth, "center")
+            love.graphics.printf("Main Menu", button4X, button4Y + 15, buttonWidth, "center")
         end
     end
 end
@@ -445,7 +480,10 @@ end
 -- Handle player movement
 function love.keypressed(key)
     if key == "h" then state = "highscore" end --++
-    if key == "e" then state = "end" end --++
+    if key == "e" then 
+        state = "end" 
+        level = 12
+    end --++
 
     if state == "game" or state == "end" then
         local dx, dy = 0, 0
@@ -558,33 +596,33 @@ end
 function love.mousepressed(x, y, button)
     if button == 1 then
         if state == "menu" then
-            if x >= startButtonX and x <= startButtonX + buttonWidth and y >= startButtonY and y <= startButtonY + buttonHeight then
+            if x >= button1X and x <= button1X + buttonWidth and y >= button1Y and y <= button1Y + buttonHeight then
                 state = "game"
-            elseif x >= howToPlayButtonX and x <= howToPlayButtonX + buttonWidth and y >= howToPlayButtonY and y <= howToPlayButtonY + buttonHeight then
+            elseif x >= button2X and x <= button2X + buttonWidth and y >= button2Y and y <= button2Y + buttonHeight then
                 state = "howToPlay"
-            elseif x >= leaderboardButtonX and x <= leaderboardButtonX + buttonWidth and y >= leaderboardButtonY and y <= leaderboardButtonY + buttonHeight then
+            elseif x >= button3X and x <= button3X + buttonWidth and y >= button3Y and y <= button3Y + buttonHeight then
                 loadLeaderboard() -- Reload leaderboard to ensure it's up to date
                 state = "leaderboard"
             end
 
         elseif state == "howToPlay" then
-            if x >= menuButtonX and x <= menuButtonX + buttonWidth and y >= menuButtonY and y <= menuButtonY + buttonHeight then
+            if x >= button3X and x <= button3X + buttonWidth and y >= button3Y and y <= button3Y + buttonHeight then
                 state = "menu"
             end
 
         elseif state == "leaderboard" then
-            if x >= menuButtonX and x <= menuButtonX + buttonWidth and y >= menuButtonY and y <= menuButtonY + buttonHeight then
+            if x >= button3X and x <= button3X + buttonWidth and y >= button3Y and y <= button3Y + buttonHeight then
                 state = "menu"
             end
 
         elseif state == "game" then
-            if x >= resetButtonX and x <= resetButtonX + buttonWidth and y >= resetButtonY and y <= resetButtonY + buttonHeight then
+            if x >= button6X and x <= button6X + buttonWidth and y >= button6Y and y <= button6Y + buttonHeight then
                 resetStatus[level] = true
                 score = entryScore
                 doorLock = false
                 dotCount = 0
                 love.load()
-            elseif x >= resetButtonX - buttonWidth and x <= resetButtonX and y >= resetButtonY and y <= resetButtonY + buttonHeight then
+            elseif x >= button5X and x <= button5X + buttonWidth and y >= button5Y and y <= button5Y + buttonHeight then
                 freshRestart()
             end
 
@@ -606,9 +644,10 @@ function love.mousepressed(x, y, button)
             end
 
         elseif state == "end" then
-            if x >= exitButtonX and x <= exitButtonX + buttonWidth and y >= exitButtonY and y <= exitButtonY + buttonHeight then
-                love.event.quit()
-            elseif x >= menuButtonX and x <= menuButtonX + buttonWidth and y >= menuButtonY and y <= menuButtonY + buttonHeight then
+            if x >= button3X and x <= button3X + buttonWidth and y >= button3Y and y <= button3Y + buttonHeight then
+                state = "leaderboard"
+                freshRestart()
+            elseif x >= button4X and x <= button4X + buttonWidth and y >= button4Y and y <= button4Y + buttonHeight then
                 freshRestart()
             end
         end
