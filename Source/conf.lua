@@ -6,9 +6,9 @@ function love.conf(t)
     t.window.icon = "images/duckGif/frame_1.png"
     t.window.resizable = false
     t.window.width = (608)
-    t.window.height = (800) --544
-    t.window.x = (1264) --656
-    t.window.y = (98) --268
+    t.window.height = (1317) --544
+    t.window.x = (400) --656
+    t.window.y = (32) --268
     t.modules.joystick = false
     t.modules.physics = false
 end
