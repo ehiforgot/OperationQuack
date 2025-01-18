@@ -3,7 +3,7 @@ local conf = require("conf")
 
 local levels = conf.loadLevels()
 local player = { x = 1, y = 1 }
-local level = 12 -- Keeps track of current level
+local level = 1 -- Keeps track of current level
 local totalLevels = 0
 local TILE_SIZE = 32 -- Tile size in pixels
 local score = 0 -- Current score
