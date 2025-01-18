@@ -3,7 +3,7 @@ local conf = require("conf")
 
 local levels = conf.loadLevels()
 local player = { x = 1, y = 1 }
-local level = 1 -- Keeps track of current level
+local level = 12 -- Keeps track of current level
 local totalLevels = 0
 local TILE_SIZE = 32 -- Tile size in pixels
 local score = 0 -- Current score
@@ -12,6 +12,10 @@ local userInput = ""
 local dotCount = 0
 local solved = 0
 local doorLock = false
+
+-- User Screen dimensions
+local screen_width = love.graphics.getWidth()
+local screen_height = love.graphics.getHeight()
 
 -- Grid dimensions
 local GRID_WIDTH = 19
@@ -207,6 +211,8 @@ end
 function love.load()
     levels = conf.loadLevels()
     totalLevels = 0
+
+    love.window.setFullscreen(true, "desktop")
 
     for key, value in pairs(levels) do
         totalLevels = totalLevels + 1
